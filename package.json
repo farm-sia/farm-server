@@ -1,0 +1,22 @@
+{
+  "name": "farm-server",
+  "version": "1.0.0",
+  "description": "",
+  "main": "main.js",
+  "scripts": {
+    "start": "node main.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/farm-sia/farm-server.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/farm-sia/farm-server/issues"
+  },
+  "homepage": "https://github.com/farm-sia/farm-server#readme",
+  "dependencies": {
+    "ws": "^8.5.0"
+  }
+}
