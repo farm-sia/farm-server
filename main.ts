@@ -15,6 +15,7 @@ const wss = new WebSocket.Server({ port: 5555 })
 wss.on("listening", () => {
 	console.log("[ws] server up")
 })
+
 raspi.init(() => {
 	console.log("[raspi] init finished")	
 	IN1A = new pwm.SoftPWM({pin: 'GPIO23', frequency: 2000})
@@ -24,12 +25,23 @@ raspi.init(() => {
 	IN2B = new pwm.SoftPWM({pin: 'GPIO22', frequency: 2000})
 })
 
+function reset_motors() {
+	direction = "n"
+	speed = 0
+	update_pwm_pins()
+	console.log("[ws] client disconnected, stopping motors")
+}
+
 wss.on('connection', (ws, req) => {
 	ws.on('message', data => {
 		handle_message(data.toString())
 	})
 
 	console.log("[ws] connected to client " + req.socket.remoteAddress)
+
+
+	ws.on('close', reset_motors)
+	ws.on('error', reset_motors)
 })
 
 function handle_message(msg: string) {
