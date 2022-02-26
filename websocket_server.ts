@@ -16,7 +16,6 @@ export function init_ws() {
 
 		console.log("[ws] connected to client " + req.socket.remoteAddress)
 
-
 		ws.on('close', raspi_pins.reset_motors)
 		ws.on('error', raspi_pins.reset_motors)
 	})
@@ -39,4 +38,10 @@ function handle_message(msg: string) {
 		default:
 			console.log("wrong command")
 	}
+}
+
+export function send_message(header: string, content: string) {
+	wss.clients.forEach(function(client) {
+		client.send(`${header} ${content}`)
+	})
 }
