@@ -20,6 +20,7 @@
     "@types/ws": "^8.2.3",
     "raspi": "^6.0.1",
     "raspi-soft-pwm": "^6.0.2",
+    "rosnodejs": "^3.0.2",
     "ws": "^8.5.0"
   }
 }
