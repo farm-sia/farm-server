@@ -1,12 +1,21 @@
 #include "ws-server.hpp"
 
-#include <iostream>
+std::vector<std::string> WsServer::get_msg_header(std::stringstream msg) {
+	std::string segment;
+	std::getline(msg, segment, ' ');
+
+	std::vector<std::string> ret;
+	ret.push_back(segment);
+	ret.push_back(msg.str);
+
+	return ret;
+}
 
 // Define a callback to handle incoming messages
 void WsServer::on_message(websocketpp::connection_hdl hdl, server::message_ptr msg) {
-    std::cout << "on_message called with hdl: " << hdl.lock().get()
-              << " and message: " << msg->get_payload()
-              << std::endl;
+    std::cout << "[ws] got message: " << msg->get_payload() << std::endl;
+	
+	std::vector<std::string> splitted_msg = get_msg_header(std::stringstream(msg->get_payload()));
 
     // check for a special command to instruct the server to stop listening so
     // it can be cleanly exited.
@@ -15,12 +24,12 @@ void WsServer::on_message(websocketpp::connection_hdl hdl, server::message_ptr m
         return;
     }
 
-    try {
+    /*try {
         ws_server.send(hdl, msg->get_payload(), msg->get_opcode());
     } catch (websocketpp::exception const & e) {
         std::cout << "Echo failed because: "
                   << "(" << e.what() << ")" << std::endl;
-    }
+    }*/
 }
 
 WsServer::WsServer(int _port) {
@@ -52,8 +61,8 @@ void WsServer::start_ws_server() {
         // Start the ASIO io_service run loop
         ws_server.run();
     } catch (websocketpp::exception const &e) {
-        std::cout << e.what() << std::endl;
+        std::cout << "[ws] error: " << e.what() << std::endl;
     } catch (...) {
-        std::cout << "other exception" << std::endl;
+        std::cout << "[ws] other exception" << std::endl;
     }
 }

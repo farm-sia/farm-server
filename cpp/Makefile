@@ -1,5 +1,5 @@
-LDFLAGS +=
-OBJECTS := main.o ws-server.o
+LDFLAGS += -lpthread -lpigpio -lrt
+OBJECTS := main.o ws-server.o rpi_gpio.o
 CXXFLAGS ?= -Wall -Wextra
 CXXFLAGS += -std=c++11
 CXX ?= g++
