@@ -22,21 +22,20 @@ export function init_ws() {
 }
 
 function handle_message(msg: string) {
-	var content = msg.slice(msg.indexOf(" ") + 1)
-	var command = msg.slice(0, msg.indexOf(" "))
-	switch (command) {
-		case "direction":
-			if (["n", "l", "r"].includes(content)) {
-				raspi_pins.update_pwm_pins(content, undefined)
+	var content = JSON.parse(msg)
+	switch (content["packet"]) {
+		case "steering":
+			if (content["direction"]) {
+				if (["n", "l", "r"].includes(content["direction"])) {
+					raspi_pins.update_pwm_pins(content["direction"], undefined)
+				}
 			}
-			break
-		case "speed":
-			if (parseFloat(content) >= -1 && parseFloat(content) <= 1) {
-				raspi_pins.update_pwm_pins(undefined, parseFloat(content))
+			if (content["speed"]) {
+				if (parseFloat(content["speed"]) >= -1 && parseFloat(content["speed"]) <= 1) {
+					raspi_pins.update_pwm_pins(undefined, parseFloat(content["speed"]))
+				}
 			}
-			break
-		default:
-			console.log("wrong command")
+			break;
 	}
 }
 
