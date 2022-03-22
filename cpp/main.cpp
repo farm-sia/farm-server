@@ -1,7 +1,6 @@
-#include "ws-server.hpp"
-#include "rpi_gpio.hpp"
+#include "main.hpp"
 
 int main () {
-	RpiGpio rpi_gpio = RpiGpio();
-    WsServer ws_server = WsServer(5555);
+	rpi_gpio = new RpiGpio();
+    ws_server = new WsServer(5555);
 }

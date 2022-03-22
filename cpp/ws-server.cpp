@@ -1,21 +1,13 @@
 #include "ws-server.hpp"
 
-std::vector<std::string> WsServer::get_msg_header(std::stringstream msg) {
-	std::string segment;
-	std::getline(msg, segment, ' ');
 
-	std::vector<std::string> ret;
-	ret.push_back(segment);
-	ret.push_back(msg.str);
-
-	return ret;
+void WsServer::handle_msg(nlohmann::json msg) {
+    std::cout << msg["packet"].get<std::string>() << std::endl;
 }
 
 // Define a callback to handle incoming messages
 void WsServer::on_message(websocketpp::connection_hdl hdl, server::message_ptr msg) {
     std::cout << "[ws] got message: " << msg->get_payload() << std::endl;
-	
-	std::vector<std::string> splitted_msg = get_msg_header(std::stringstream(msg->get_payload()));
 
     // check for a special command to instruct the server to stop listening so
     // it can be cleanly exited.
@@ -23,7 +15,12 @@ void WsServer::on_message(websocketpp::connection_hdl hdl, server::message_ptr m
         ws_server.stop_listening();
         return;
     }
-
+    try {
+        nlohmann::json msg_json = nlohmann::json::parse(msg->get_payload());
+        handle_msg(msg_json);
+    } catch (...) {
+        std::cout << "[ws] json parse failed at " << msg->get_payload() << std::endl;
+    }
     /*try {
         ws_server.send(hdl, msg->get_payload(), msg->get_opcode());
     } catch (websocketpp::exception const & e) {
@@ -40,10 +37,6 @@ WsServer::WsServer(int _port) {
 void WsServer::start_ws_server() {
     // Create a server endpoint
     try {
-        // Set logging settings
-        //ws_server.set_access_channels(websocketpp::log::alevel::all);
-        //ws_server.clear_access_channels(websocketpp::log::alevel::frame_payload);
-
         // Initialize Asio
         ws_server.init_asio();
 
