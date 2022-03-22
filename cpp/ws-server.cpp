@@ -1,8 +1,21 @@
 #include "ws-server.hpp"
-
+#include "main.hpp"
 
 void WsServer::handle_msg(nlohmann::json msg) {
-    std::cout << msg["packet"].get<std::string>() << std::endl;
+	std::string packet = msg["packet"].get<std::string>();
+	if (packet == "steering") {
+		if (msg.count("direction") > 0) {
+			rpi_gpio->direction = msg["direction"].get<std::string>().front();
+			std::cout << "set direction to " << msg["direction"].get<std::string>().front() << std::endl;
+		}
+		if (msg.count("speed") > 0) {
+			rpi_gpio->speed = msg["speed"].get<float>();
+			std::cout << "set speed to " << (msg["speed"].get<float>()) << std::endl;
+		}
+		rpi_gpio->update_pwm_pins();
+	} else {
+		std::cout << "[ws] got packet with invalid name" << std::endl;
+	}
 }
 
 // Define a callback to handle incoming messages
