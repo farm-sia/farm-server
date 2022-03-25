@@ -37,11 +37,19 @@ void WsServer::on_message(websocketpp::connection_hdl hdl, server::message_ptr m
 }
 
 void WsServer::on_open(websocketpp::connection_hdl hdl) {
-    open_connection = hdl;
+    m_connections.insert(hdl);
 }
 
-void WsServer::send(std::string packet_name, std::string content) {
-    std::cout << "sending packet " << packet_name << " with content " << content << std::endl;
+void WsServer::on_close(websocketpp::connection_hdl hdl) {
+    m_connections.erase(hdl);
+}
+
+void WsServer::send(std::string packet_name, nlohmann::json content) {
+    //std::cout << "sending packet " << packet_name << " with content " << content.dump() << std::endl;
+    content["packet"] = packet_name; 
+    for (const websocketpp::connection_hdl& hdl : m_connections) {
+        ws_server.send(hdl, content.dump(), websocketpp::frame::opcode::text);
+    }
 }
 
 WsServer::WsServer() {
@@ -51,8 +59,11 @@ WsServer::WsServer() {
     // Register our message handler
     using websocketpp::lib::placeholders::_1;
     using websocketpp::lib::placeholders::_2;
+
+    ws_server.clear_access_channels(websocketpp::log::alevel::all);
     ws_server.set_message_handler(websocketpp::lib::bind(&WsServer::on_message,this,_1,_2));
     ws_server.set_open_handler(bind(&WsServer::on_open,this,::_1));
+    ws_server.set_close_handler(bind(&WsServer::on_close,this,::_1));
 }
 
 void WsServer::run(int port) {
