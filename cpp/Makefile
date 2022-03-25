@@ -1,5 +1,5 @@
 LDFLAGS += -lpthread -lwiringPi -lroscpp -lrostime -lrosconsole
-OBJECTS := main.o ws-server.o ros_node.o rpi_gpio.o
+OBJECTS := main.o ws-server.o ros_node.o
 CXXFLAGS ?= -Wall -Wextra
 CXXFLAGS += -std=c++11
 CXX ?= g++
