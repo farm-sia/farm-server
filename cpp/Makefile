@@ -1,11 +1,11 @@
-LDFLAGS += -lpthread -lwiringPi
-OBJECTS := main.o ws-server.o
+LDFLAGS += -lpthread -lwiringPi -lroscpp -lrostime -lrosconsole
+OBJECTS := main.o ws-server.o ros_node.o
 CXXFLAGS ?= -Wall -Wextra
 CXXFLAGS += -std=c++11
 CXX ?= g++
-INCLUDES :=
-
-HEADERS := 
+INCLUDES := -I /opt/ros/noetic/include
+LINKS := -L /opt/ros/noetic/lib -Wl,-rpath,/opt/ros/noetic/lib
+HEADERS :=
 EXECUTABLE := main
 
 dummy: OBJECTS += rpi_gpio_dummy.o
@@ -27,15 +27,12 @@ debug: $(EXECUTABLE)
 release: $(EXECUTABLE)
 
 $(EXECUTABLE): $(OBJECTS) $(HEADERS)
-	$(CXX) $(OBJECTS) $(LDFLAGS) -o $@
+	$(CXX) $(OBJECTS) $(INCLUDES) $(LINKS) $(LDFLAGS) -o $@
 
 %.o: %.cpp $(HEADERS)
 	$(CXX) $(CXXFLAGS) $(INCLUDES) $< -c
 
 .PHONY: clean $(BOARD_LIB)
-
-$(BOARD_LIB):
-	$(MAKE) -C ../lib $(BUILD_TYPE)
 
 clean:
 	$(RM) $(EXECUTABLE) $(OBJECTS)

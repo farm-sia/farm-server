@@ -1,0 +1,13 @@
+{
+    "env": {
+      "myDefaultIncludePath": ["${workspaceFolder}"],
+    },
+    "configurations": [
+        {
+            "name": "Linux",
+            "includePath": ["${myDefaultIncludePath}", "/opt/ros/noetic/include"]
+        }
+    ],
+    "version": 4
+  }
+  
