@@ -34,35 +34,37 @@ void WsServer::on_message(websocketpp::connection_hdl hdl, server::message_ptr m
     } catch (...) {
         std::cout << "[ws] json parse failed at " << msg->get_payload() << std::endl;
     }
-    /*try {
-        ws_server.send(hdl, msg->get_payload(), msg->get_opcode());
-    } catch (websocketpp::exception const & e) {
-        std::cout << "Echo failed because: "
-                  << "(" << e.what() << ")" << std::endl;
-    }*/
 }
 
-WsServer::WsServer(int _port) {
-    port = _port;
-    start_ws_server();
+void WsServer::on_open(websocketpp::connection_hdl hdl) {
+    open_connection = hdl;
 }
 
-void WsServer::start_ws_server() {
+void WsServer::send(std::string packet_name, std::string content) {
+    std::cout << "sending packet " << packet_name << " with content " << content << std::endl;
+}
+
+WsServer::WsServer() {
+    // Initialize Asio
+    ws_server.init_asio();
+
+    // Register our message handler
+    using websocketpp::lib::placeholders::_1;
+    using websocketpp::lib::placeholders::_2;
+    ws_server.set_message_handler(websocketpp::lib::bind(&WsServer::on_message,this,_1,_2));
+    ws_server.set_open_handler(bind(&WsServer::on_open,this,::_1));
+}
+
+void WsServer::run(int port) {
     // Create a server endpoint
     try {
-        // Initialize Asio
-        ws_server.init_asio();
-
-        // Register our message handler
-        using websocketpp::lib::placeholders::_1;
-        using websocketpp::lib::placeholders::_2;
-        ws_server.set_message_handler(websocketpp::lib::bind(&WsServer::on_message,this,_1,_2));
-
         // Listen on port
         ws_server.listen(port);
 
         // Start the server accept loop
         ws_server.start_accept();
+
+        std::cout << "[ws] finished init of server, starting asio..." << std::endl;
 
         // Start the ASIO io_service run loop
         ws_server.run();
