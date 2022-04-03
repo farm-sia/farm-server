@@ -40,7 +40,6 @@ nlohmann::json occ_grid_to_json(const nav_msgs::OccupancyGrid& grid) {
 }
 
 void RosNode::map_topic(const nav_msgs::OccupancyGrid& grid) {
-
     ws_server->send("ros_map", occ_grid_to_json(grid));
 }
 
@@ -48,11 +47,16 @@ void RosNode::pose_topic(const geometry_msgs::PoseStamped& pose) {
     ws_server->send("ros_pose", pose_stamped_to_json(pose));
 }
 
+void RosNode::vel_topic(const geometry_msgs::Twist& twist) {
+        std::cout << "got cmd vel" << std::endl;
+}
+
 RosNode::RosNode(int argc, char** argv) {
     ros::init(argc, argv, "farm_server");
     ros::NodeHandle nh;
     ros::Subscriber map_topic_sub = nh.subscribe("map", 1, RosNode::map_topic);
     ros::Subscriber pose_topic_sub = nh.subscribe("tracked_pose", 1, RosNode::pose_topic);
+	ros::Subscriber vel_topic_sub = nh.subscribe("cmd_vel", 1, RosNode::vel_topic);
     std::cout << "[ros] node init finished, starting spin..." << std::endl;
     ros::spin();
 }
