@@ -47,8 +47,24 @@ void RosNode::pose_topic(const geometry_msgs::PoseStamped& pose) {
     ws_server->send("ros_pose", pose_stamped_to_json(pose));
 }
 
+nlohmann::json vec3_to_json(const geometry_msgs::Vector3& vec) {
+	nlohmann::json j;
+	j["x"] = vec.x;
+	j["y"] = vec.y;
+	j["z"] = vec.z;
+	return j;
+
+}
+
+nlohmann::json twist_to_json(const geometry_msgs::Twist& twist) {
+	nlohmann::json j;
+	j["linear"] = vec3_to_json(twist.linear);
+	j["angular"] = vec3_to_json(twist.angular);
+	return j;
+}
+
 void RosNode::vel_topic(const geometry_msgs::Twist& twist) {
-        std::cout << "got cmd vel" << std::endl;
+    ws_server->send("ros_vel", twist_to_json(twist));
 }
 
 RosNode::RosNode(int argc, char** argv) {
