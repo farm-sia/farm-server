@@ -1,4 +1,4 @@
-LDFLAGS += -lpthread -lwiringPi -lroscpp -lrostime -lrosconsole -lroscpp_serialization
+LDFLAGS += -lpthread -lwiringPi -lroscpp -lrostime -lrosconsole -lroscpp_serialization -lboost_thread -lactionlib
 OBJECTS := main.o ws-server.o ros_node.o rpi_gpio.o
 CXXFLAGS ?= -Wall -Wextra
 CXXFLAGS += -std=c++11

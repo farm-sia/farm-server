@@ -2,6 +2,9 @@
 #include "main.hpp"
 #include "json.hpp"
 #include <iostream>
+#include <thread>
+
+#include <boost/thread.hpp>
 
 nlohmann::json pose_to_json(const geometry_msgs::Pose& pose) {
     nlohmann::json position;
@@ -67,12 +70,64 @@ void RosNode::vel_topic(const geometry_msgs::Twist& twist) {
     ws_server->send("ros_vel", twist_to_json(twist));
 }
 
+void send_move_goal(move_base_msgs::MoveBaseGoal g, MoveBaseClient* accc) {
+ //wait for the action server to come up
+	MoveBaseClient ac("move_base", false);
+  while(!ac.waitForServer(ros::Duration(5.0))){
+    ROS_INFO("Waiting for the move_base action server to come up");
+  }
+
+  move_base_msgs::MoveBaseGoal goal;
+
+  //we'll send a goal to the robot to move 1 meter forward
+  goal.target_pose.header.frame_id = "base_link";
+  goal.target_pose.header.stamp = ros::Time::now();
+
+  goal.target_pose.pose.position.x = 1.0;
+  goal.target_pose.pose.orientation.w = 1.0;
+
+  ROS_INFO("Sending goal");
+  ac.sendGoal(goal);
+
+  ac.waitForResult();
+
+  if(ac.getState() == actionlib::SimpleClientGoalState::SUCCEEDED)
+    ROS_INFO("Hooray, the base moved 1 meter forward");
+  else
+    ROS_INFO("The base failed to move forward 1 meter for some reason");
+
+}
+
+void RosNode::set_move_goal(float pos_x, float pos_y, float pos_z) {
+	std::cout << "publish goal start" << std::endl;
+	move_base_msgs::MoveBaseGoal goal;
+
+	goal.target_pose.header.frame_id = "base_link";
+	goal.target_pose.header.stamp = ros::Time::now();
+
+	goal.target_pose.pose.position.x = pos_x;
+	goal.target_pose.pose.position.y = pos_y;
+	goal.target_pose.pose.position.z = pos_z;
+	goal.target_pose.pose.orientation.w = 1.0;
+	std::cout << "publish goal created goal" << std::endl;
+
+	std::thread t(send_move_goal, goal, nullptr);
+	t.detach();
+}
+
+void ros_spin() {
+	ros::spin();
+}
+
 RosNode::RosNode(int argc, char** argv) {
     ros::init(argc, argv, "farm_server");
     ros::NodeHandle nh;
     ros::Subscriber map_topic_sub = nh.subscribe("map", 1, RosNode::map_topic);
     ros::Subscriber pose_topic_sub = nh.subscribe("tracked_pose", 1, RosNode::pose_topic);
 	ros::Subscriber vel_topic_sub = nh.subscribe("cmd_vel", 1, RosNode::vel_topic);
-    std::cout << "[ros] node init finished, starting spin..." << std::endl;
-    ros::spin();
+
+	boost::thread spin_thread(&ros_spin);
+
+	std::cout << "[ros] node init finished, starting spin..." << std::endl;
+	spin_thread.join();
 }

@@ -1,6 +1,8 @@
 #include "main.hpp"
 #include <thread>
 
+#include<unistd.h>
+
 RpiGpio* rpi_gpio = nullptr;
 WsServer* ws_server = nullptr;
 RosNode* ros_node = nullptr;
@@ -21,9 +23,9 @@ void start_ros_node_thread (int argc, char** argv) {
 int main (int argc, char** argv) {
 	rpi_gpio = new RpiGpio();
 
-    std::thread ros_thread(start_ros_node_thread, argc, argv);
-    ros_thread.detach();
-
     std::thread ws_thread(start_ws_thread);
-    ws_thread.join();
+    ws_thread.detach();
+
+    std::thread ros_thread(start_ros_node_thread, argc, argv);
+    ros_thread.join();
 }

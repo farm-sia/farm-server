@@ -13,6 +13,8 @@ void WsServer::handle_msg(nlohmann::json msg) {
 			std::cout << "set speed to " << (msg["speed"].get<float>()) << std::endl;
 		}
 		rpi_gpio->update_pwm_pins();
+	} else if (packet == "set_goal") {
+		ros_node->set_move_goal(msg["x"], msg["y"], 0);
 	} else {
 		std::cout << "[ws] got packet with invalid name" << std::endl;
 	}
