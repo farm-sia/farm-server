@@ -70,32 +70,26 @@ void RosNode::vel_topic(const geometry_msgs::Twist& twist) {
     ws_server->send("ros_vel", twist_to_json(twist));
 }
 
-void send_move_goal(move_base_msgs::MoveBaseGoal g, MoveBaseClient* accc) {
- //wait for the action server to come up
-	MoveBaseClient ac("move_base", false);
-  while(!ac.waitForServer(ros::Duration(5.0))){
-    ROS_INFO("Waiting for the move_base action server to come up");
-  }
+void send_move_goal(move_base_msgs::MoveBaseGoal g) {
+	 //wait for the action server to come up
+		MoveBaseClient ac("move_base", false);
+	while(!ac.waitForServer(ros::Duration(5.0))){
+		ROS_INFO("Waiting for the move_base action server to come up");
+	}
 
-  move_base_msgs::MoveBaseGoal goal;
+	ROS_INFO("Sending goal");
+	ac.sendGoal(g);
 
-  //we'll send a goal to the robot to move 1 meter forward
-  goal.target_pose.header.frame_id = "base_link";
-  goal.target_pose.header.stamp = ros::Time::now();
+	ac.waitForResult();
 
-  goal.target_pose.pose.position.x = 1.0;
-  goal.target_pose.pose.orientation.w = 1.0;
-
-  ROS_INFO("Sending goal");
-  ac.sendGoal(goal);
-
-  ac.waitForResult();
-
-  if(ac.getState() == actionlib::SimpleClientGoalState::SUCCEEDED)
-    ROS_INFO("Hooray, the base moved 1 meter forward");
-  else
-    ROS_INFO("The base failed to move forward 1 meter for some reason");
-
+	if(ac.getState() == actionlib::SimpleClientGoalState::SUCCEEDED) {	
+		ROS_INFO("Hooray, the base moved 1 meter forward");
+		ws_server->send("goal_reached");
+	}
+	else {
+		ROS_INFO("The base failed to move forward 1 meter for some reason");
+		ws_server->send("goal_failed");
+	}
 }
 
 void RosNode::set_move_goal(float pos_x, float pos_y, float pos_z) {
@@ -109,9 +103,9 @@ void RosNode::set_move_goal(float pos_x, float pos_y, float pos_z) {
 	goal.target_pose.pose.position.y = pos_y;
 	goal.target_pose.pose.position.z = pos_z;
 	goal.target_pose.pose.orientation.w = 1.0;
-	std::cout << "publish goal created goal" << std::endl;
+	std::cout << "publish goal created goal " << pos_x << " " << pos_y << std::endl;
 
-	std::thread t(send_move_goal, goal, nullptr);
+	std::thread t(send_move_goal, goal);
 	t.detach();
 }
 

@@ -18,18 +18,7 @@ RpiGpio::RpiGpio() {
 	std::cout << "[rpi] init finished" << std::endl;
 }
 
-void RpiGpio::update_pwm_pins() {
-	float r_speed = speed;
-	float l_speed = speed;
-
-	std::cout << "update pins to " << direction << " " << speed << std::endl;
-
-	if (direction == 'r') {
-		r_speed *= 0.5;
-	} else if (direction == 'l') {
-		l_speed *= 0.5;
-	}
-	
+void RpiGpio::update_pwm_pins(float l_speed, float r_speed) {
 	if (r_speed > 0) {
 		softPwmWrite(IN1A, 0);
 		softPwmWrite(IN2A, r_speed * MAX_PWM);
@@ -47,8 +36,6 @@ void RpiGpio::update_pwm_pins() {
 }
 
 void RpiGpio::reset_motors () {
-	direction = 'n';
-	speed = 0;
-	update_pwm_pins();
+	update_pwm_pins(0, 0);
 	std::cout << "[rpi] reset motors" << std::endl;
 }

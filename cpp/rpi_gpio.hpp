@@ -8,11 +8,8 @@
 
 class RpiGpio {
 public:
-	char direction = 'n';
-	float speed = 0;
-	
 	RpiGpio();
 	
-	void update_pwm_pins();
+	void update_pwm_pins(float l_speed, float r_speed);
 	void reset_motors();
 };

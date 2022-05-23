@@ -4,15 +4,7 @@
 void WsServer::handle_msg(nlohmann::json msg) {
 	std::string packet = msg["packet"].get<std::string>();
 	if (packet == "steering") {
-		if (msg.count("direction") > 0) {
-			rpi_gpio->direction = msg["direction"].get<std::string>().front();
-			std::cout << "set direction to " << msg["direction"].get<std::string>().front() << std::endl;
-		}
-		if (msg.count("speed") > 0) {
-			rpi_gpio->speed = msg["speed"].get<float>();
-			std::cout << "set speed to " << (msg["speed"].get<float>()) << std::endl;
-		}
-		rpi_gpio->update_pwm_pins();
+		rpi_gpio->update_pwm_pins(msg["l"].get<float>(), msg["r"].get<float>());
 	} else if (packet == "set_goal") {
 		ros_node->set_move_goal(msg["x"], msg["y"], 0);
 	} else {
@@ -44,6 +36,11 @@ void WsServer::on_open(websocketpp::connection_hdl hdl) {
 
 void WsServer::on_close(websocketpp::connection_hdl hdl) {
     m_connections.erase(hdl);
+}
+
+void WsServer::send(std::string packet_name) {
+	nlohmann::json j;
+	send(packet_name, j);
 }
 
 void WsServer::send(std::string packet_name, nlohmann::json content) {

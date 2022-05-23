@@ -16,6 +16,7 @@ public:
     void on_open(websocketpp::connection_hdl hdl);
     void on_close(websocketpp::connection_hdl hdl);
     void send(std::string packet_name, nlohmann::json content);
+    void send(std::string packet_name);
 
     server ws_server;
     int port;
