@@ -5,6 +5,12 @@
 
 #define MAX_PWM 100
 
+/*
+	Diese Datei implementiert dieselben Methoden wie die Datei
+	rpi_gpio.cpp, nur ohne dass diese Methoden irgendwas ausführen.
+	Dies ermöglicht das Ausführen des Servers auf PCs, die keine Raspberry PIs sind
+*/
+
 RpiGpio::RpiGpio() {
 	std::cout << "[rpi] dummy init finished" << std::endl;
 }
